@@ -1,7 +1,10 @@
 from flask import Flask, render_template
 import tensorflow as tf
 from tensorflow import keras
+import numpy as np
+from numpy import zeros, newaxis
 import os
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 app = Flask(__name__)
@@ -25,16 +28,35 @@ colors = [
 
 
 def predict():
-    new_model = keras.models.load_model('newmodel.h5')
-    x = tf.constant([[-0.99668541, -0.88890724, -0.86432626, -0.87188964, -0.83596358, -0.72062204]])
-    y = new_model.predict(x)
+    new_model = keras.models.load_model('MultiStepModel.h5')
+    input = np.array([1.6386027, 1.60650694, 1.68153863, 1.82628306, 2.02199241, 2.01750265, 1.76344654,
+                      1.76777452,
+                      1.84826674,
+                      1.88859375,
+                      1.97464762,
+                      1.92250969,
+                      1.71640511,
+                      1.49507172,
+                      1.61676059,
+                      1.68930471,
+                      1.62853106,
+                      1.48789214,
+                      1.22168131,
+                      0.94374045])
+
+    b = np.tile(input, (30, 1))
+    b = np.array([b])
+    b = b.reshape(30, 20, 1)
+    b = tf.constant(b)
+
+    y = new_model.predict(b)[0]
     return y
 
 
 @app.route('/line')
 def line():
-    line_labels=labels
-    line_values=values
+    line_labels = labels
+    line_values = values
     prediction = predict()
     title = 'Prediction: ' + str(prediction)
     return render_template('graph.html', title=title, max=17000, labels=line_labels, values=line_values)
