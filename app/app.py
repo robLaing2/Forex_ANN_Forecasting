@@ -10,9 +10,9 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 app = Flask(__name__)
 
 labels = [
-    'JAN', 'FEB', 'MAR', 'APR',
-    'MAY', 'JUN', 'JUL', 'AUG',
-    'SEP', 'OCT', 'NOV', 'DEC'
+    'Month 1', 'Month 2', 'Month 3', 'Month 4',
+    'Month 5', 'Month 6', 'Month 7', 'Month 8',
+    'Month 9', 'Month 10', 'Month 11', 'Month 12'
 ]
 
 values = [
@@ -26,10 +26,7 @@ colors = [
     "#ABCDEF", "#DDDDDD", "#ABCABC", "#4169E1",
     "#C71585", "#FF4500", "#FEDCBA", "#46BFBD"]
 
-
-def predict():
-    new_model = keras.models.load_model('MultiStepModel.h5')
-    input = np.array([1.6386027, 1.60650694, 1.68153863, 1.82628306, 2.02199241, 2.01750265, 1.76344654,
+input = np.array([1.6386027, 1.60650694, 1.68153863, 1.82628306, 2.02199241, 2.01750265, 1.76344654,
                       1.76777452,
                       1.84826674,
                       1.88859375,
@@ -44,6 +41,9 @@ def predict():
                       1.22168131,
                       0.94374045])
 
+def predict():
+    new_model = keras.models.load_model('MultiStepModel.h5')
+
     b = np.tile(input, (30, 1))
     b = np.array([b])
     b = b.reshape(30, 20, 1)
@@ -56,10 +56,16 @@ def predict():
 @app.route('/line')
 def line():
     line_labels = labels
-    line_values = values
     prediction = predict()
-    title = 'Prediction: ' + str(prediction)
-    return render_template('graph.html', title=title, max=17000, labels=line_labels, values=line_values)
+
+    history = input[:6]
+    predictions = predict()
+
+    history = (history * 0.1634) + 1.308
+    predictions = (predictions * 0.1634) + 1.308
+
+    title = 'Forex Forecast.'
+    return render_template('graph.html', title=title, max=30, labels=line_labels, history=history, predictions=predictions)
 
 
 @app.route('/')

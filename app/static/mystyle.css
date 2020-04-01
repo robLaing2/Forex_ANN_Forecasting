@@ -1,0 +1,34 @@
+#titleDiv {
+  text-align:center;
+  margin: auto;
+}
+
+h1 {
+    font-family:"Courier New";
+}
+
+#groupDiv {
+  text-align: center;
+  margin: auto;
+}
+
+#graphBox {
+  display: inline-block;
+  vertical-align: top;
+  border-radius: 25px;
+  border: 2px solid #000000;
+  padding: 10px;
+  width: 600px;
+  height: 400px;
+}
+
+#statsBox {
+  display: inline-block;
+  vertical-align: top;
+  margin-left: 25px;
+  border-radius: 25px;
+  border: 2px solid #000000;
+  padding: 10px;
+  width: 300px;
+  height: 400px;
+}
