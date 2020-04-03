@@ -64,8 +64,10 @@ def line():
     history = (history * 0.1634) + 1.308
     predictions = (predictions * 0.1634) + 1.308
 
+    history = np.concatenate((history, predictions))
+
     title = 'Forex Forecast.'
-    return render_template('graph.html', title=title, max=30, labels=line_labels, history=history, predictions=predictions)
+    return render_template('graph.html', title=title, max=30, labels=line_labels, history=history)
 
 
 @app.route('/')

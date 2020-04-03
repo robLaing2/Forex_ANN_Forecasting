@@ -16,7 +16,7 @@
 
     <div id="groupDiv">
        <div id="graphBox">
-        <canvas id="chart" width="600" height="400"></canvas>
+        <canvas id="mychart" width="600" height="400"></canvas>
         </div>
         <div id="statsBox">
             <p>Hello!</p>
@@ -27,41 +27,44 @@
 
 
     <script>
-      // bar chart data
-      var barData = {
-        labels : [
-          {% for item in labels %}
-            "{{ item }}",
-          {% endfor %}
+
+        var pointBackgroundColors = ["#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF",
+                                        "#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF"];
+
+        var barData = {
+          labels : [
+            {% for item in labels %}
+              "{{ item }}",
+            {% endfor %}
         ],
 
         datasets : [{
-              fillColor: "rgba(151,187,205,0.2)",
-              strokeColor: "rgba(151,187,205,1)",
-              pointColor: "rgba(151,187,205,1)",
-              pointStrokeColor: "#fff",
-              pointHighlightFill: "#fff",
-              pointHighlightStroke: "rgba(151,187,205,1)",
-              bezierCurve : false,
+              //fillColor: ["#00FF00","#FF00FF"],
+              //strokeColor: "rgba(151,187,205,1)",
+              pointColor: pointBackgroundColors,
+              pointStrokeColor: pointBackgroundColors,
+              pointHighlightFill: pointBackgroundColors,
+              //pointHighlightStroke: "rgba(151,187,205,1)",
+              //bezierCurve : false,
+              backgroundColor:pointBackgroundColors,
               data : [
                 {% for item in history %}
                       {{ item }},
                     {% endfor %}]
-                  },
-            {
-                fillColor: "rgba(151,187,205,0.2)",
-                strokeColor: "rgba(151,187,205,1)",
-                pointColor: "rgba(151,187,205,1)",
-                pointStrokeColor: "#fff",
-                pointHighlightFill: "#fff",
-                pointHighlightStroke: "rgba(151,187,205,1)",
-                bezierCurve : false,
-                data : [
-                {% for item in predictions %}
-                      {{ item }},
-                    {% endfor %}]
-            }
-	        ]
+                  }]
+            {#{#}
+            {#    fillColor: "rgba(151,187,205,0.2)",#}
+            {#    strokeColor: "rgba(151,187,205,1)",#}
+            {#    pointColor: "rgba(151,187,205,1)",#}
+            {#    pointStrokeColor: "#fff",#}
+            {#    pointHighlightFill: "#fff",#}
+            {#    pointHighlightStroke: "rgba(151,187,205,1)",#}
+            {#    bezierCurve : false,#}
+            {#    data : [#}
+            {#    {% for item in predictions %}#}
+            {#          {{ item }},#}
+            {#        {% endfor %}]#}
+
       }
 
       Chart.defaults.global.animationSteps = 50;
@@ -75,7 +78,7 @@
       Chart.defaults.global.scaleFontSize = 16;
 
       // get bar chart canvas
-      var mychart = document.getElementById("chart").getContext("2d");
+      var mychart = document.getElementById("mychart").getContext("2d");
 
       steps = 10
       max = {{ max }}
@@ -91,6 +94,9 @@
         scaleShowLabels: true,
         bezierCurve: false,
       });
+
+        LineChartDemo.datasets[0].points[6].fillColor =   "#ffa500";
+        LineChartDemo.update();
 
     </script>
 </body>
