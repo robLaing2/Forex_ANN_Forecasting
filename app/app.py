@@ -10,9 +10,9 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 app = Flask(__name__)
 
 labels = [
-    'Month 1', 'Month 2', 'Month 3', 'Month 4',
-    'Month 5', 'Month 6', 'Month 7', 'Month 8',
-    'Month 9', 'Month 10', 'Month 11', 'Month 12'
+    'Jan', 'Feb', 'Mar', 'Apr',
+    'May', 'Jun', 'Jul', 'Aug',
+    'Sep', 'Oct', 'Nov', 'Dec'
 ]
 
 values = [

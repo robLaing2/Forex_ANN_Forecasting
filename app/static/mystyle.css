@@ -1,25 +1,33 @@
+body {
+  background-color: #181818;
+}
+
 #titleDiv {
   text-align:center;
   margin: auto;
 }
 
 h1 {
-    font-family:"Courier New";
+  font-family:"Courier New";
+  color: #ffa500;
+  font-size:50px;
 }
 
 #groupDiv {
   text-align: center;
   margin: auto;
+  font-family:"Courier New";
 }
 
 #graphBox {
   display: inline-block;
   vertical-align: top;
   border-radius: 25px;
-  border: 2px solid #000000;
+  border: 2px solid #ffa500;
   padding: 10px;
   width: 600px;
-  height: 400px;
+  height: 450px;
+  background-color: #DCDCDC;
 }
 
 #statsBox {
@@ -27,8 +35,55 @@ h1 {
   vertical-align: top;
   margin-left: 25px;
   border-radius: 25px;
-  border: 2px solid #000000;
+  border: 2px solid #ffa500;
   padding: 10px;
   width: 300px;
-  height: 400px;
+  height: 450px;
+  background-color: #DCDCDC;
+}
+
+#savingsDiv {
+  margin: 50px auto auto;
+  text-align: center;
+  font-family:"Courier New";
+}
+
+#stats {
+  text-align: left;
+  margin-top: 10px;
+}
+
+ul li{
+  padding: 5px 0px;
+  text-align: left;
+}
+
+.button {
+  background-color: #ddd;
+  border: none;
+  color: black;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: auto;
+  cursor: pointer;
+  border-radius: 16px;
+  font-family:"Courier New";
+  font-size:20px;
+}
+
+.graphButtons {
+  font-family: "Courier New";
+  display: inline-block;
+  border: 2px solid black;
+  color: black;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  margin: auto 25px auto 25px;
+  cursor: pointer;
+  border-radius: 16px;
+  background-color: #616161;
+  font-weight: bold;
 }

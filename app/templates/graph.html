@@ -17,17 +17,34 @@
     <div id="groupDiv">
        <div id="graphBox">
         <canvas id="mychart" width="600" height="400"></canvas>
+           <button class="graphButtons">
+               GBP/EUR
+           </button>
+           <button class="graphButtons">
+               EUR/GBP
+           </button>
         </div>
         <div id="statsBox">
-            <p>Hello!</p>
+            <h2>Confidence:</h2>
+            <ul>
+                <li>Month 1:</li>
+                <li>Month 2:</li>
+                <li>Month 3:</li>
+                <li>Month 4:</li>
+                <li>Month 5:</li>
+                <li>Month 6:</li>
+            </ul>
         </div>
     </div>
 
-
+    <div id="savingsDiv">
+        <button class="button">
+            Calculate potential savings
+        </button>
+    </div>
 
 
     <script>
-
         var pointBackgroundColors = ["#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF",
                                         "#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF"];
 
@@ -52,30 +69,9 @@
                       {{ item }},
                     {% endfor %}]
                   }]
-            {#{#}
-            {#    fillColor: "rgba(151,187,205,0.2)",#}
-            {#    strokeColor: "rgba(151,187,205,1)",#}
-            {#    pointColor: "rgba(151,187,205,1)",#}
-            {#    pointStrokeColor: "#fff",#}
-            {#    pointHighlightFill: "#fff",#}
-            {#    pointHighlightStroke: "rgba(151,187,205,1)",#}
-            {#    bezierCurve : false,#}
-            {#    data : [#}
-            {#    {% for item in predictions %}#}
-            {#          {{ item }},#}
-            {#        {% endfor %}]#}
+
 
       }
-
-      Chart.defaults.global.animationSteps = 50;
-      Chart.defaults.global.tooltipYPadding = 16;
-      Chart.defaults.global.tooltipCornerRadius = 0;
-      Chart.defaults.global.tooltipTitleFontStyle = "normal";
-      Chart.defaults.global.tooltipFillColor = "rgba(0,0,0,0.8)";
-      Chart.defaults.global.animationEasing = "easeOutBounce";
-      Chart.defaults.global.responsive = false;
-      Chart.defaults.global.scaleLineColor = "black";
-      Chart.defaults.global.scaleFontSize = 16;
 
       // get bar chart canvas
       var mychart = document.getElementById("mychart").getContext("2d");
@@ -95,7 +91,7 @@
         bezierCurve: false,
       });
 
-        LineChartDemo.datasets[0].points[6].fillColor =   "#ffa500";
+        LineChartDemo.datasets[0].points[6].fillColor ="#ffa500";
         LineChartDemo.update();
 
     </script>
