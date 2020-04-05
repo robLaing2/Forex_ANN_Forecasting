@@ -34,6 +34,7 @@
                 <li>Month 5:</li>
                 <li>Month 6:</li>
             </ul>
+            <p id="recentDateText">Most recent data collected: 31/01/20</p>
         </div>
     </div>
 
@@ -82,8 +83,8 @@
       var LineChartDemo = new Chart(mychart).Line(barData, {
         scaleOverride: true,
         scaleSteps: steps,
-        scaleStepWidth: 0.05,
-        scaleStartValue: 1.4,
+        scaleStepWidth: 0.1,
+        scaleStartValue: 1,
         scaleShowVerticalLines: true,
         scaleShowGridLines : true,
         barShowStroke : true,
