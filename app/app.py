@@ -118,10 +118,7 @@ def predict():
 
     mov = mov[indices]
 
-    #print(dates[indices])
-
-    #print()
-    #print(input)
+    recent = dates[-1]
 
     b = np.tile(mov, (30, 1))
     b = np.array([b])
@@ -129,16 +126,25 @@ def predict():
     b = tf.constant(b)
 
     y = new_model.predict(b)[0]
-    return y
+    return y, recent
 
 
 @app.route('/line')
 def line():
-    line_labels = labels
-    prediction = predict()
+    predictions, recent = predict()
+
+    recentDate = str(recent)[:10]
+
+    recent = recent.month
+
+    if recent > 6:
+        x = 18 - recent
+    else:
+        x = 6 - recent
+
+    months = (labels[-x:] + labels[:-x])
 
     history = input[:6]
-    predictions = predict()
 
     history = (history * 0.1634) + 1.308
     predictions = (predictions * 0.1634) + 1.308
@@ -146,7 +152,8 @@ def line():
     history = np.concatenate((history, predictions))
 
     title = 'Forex Forecast.'
-    return render_template('graph.html', title=title, max=30, labels=line_labels, history=history)
+
+    return render_template('graph.html', title=title, max=30, labels=months, history=history, recentDate=recentDate)
 
 
 @app.route('/')
