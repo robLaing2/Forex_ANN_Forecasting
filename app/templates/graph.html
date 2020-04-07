@@ -58,29 +58,29 @@
                     </div>
                     <div class="inputDiv">
                         <p>From:</p>
-                        <img src="{{ url_for('static', filename='britishFlagCircular.png')}}" alt="Girl in a jacket" style="width:40px;height:40px;">
+                        <img src="{{ url_for('static', filename='britishFlagCircular.png')}}" id="flag1" style="width:40px;height:40px;">
                     </div >
                     <div class="inputDiv">
                         <br><br><br>
-                        <input type="image" src="{{ url_for('static', filename='switch.png')}}" id="saveForm" style="width:20px;height:35px;" />
+                        <input type="image" src="{{ url_for('static', filename='switch.png')}}" id="saveForm" onClick="switchCurrency()" style="width:20px;height:35px;" />
                     </div>
                     <div class="inputDiv">
                         <p>To:</p>
-                        <img src="{{ url_for('static', filename='europeFlagCircular.png')}}" alt="Girl in a jacket" style="width:40px;height:40px;">
+                        <img src="{{ url_for('static', filename='europeFlagCircular.png')}}" id="flag2" style="width:40px;height:40px;">
                     </div>
                     <div class="inputDiv">
                         <br><br><br>
-                        <Button class="savingsColumn" style="width:40px;height:40px;"> <b> > </b> </Button>
+                        <Button class="savingsColumn" onClick="calculateExchange()" style="width:40px;height:40px;"> <b> > </b> </Button>
                     </div>
                 </div>
                 <div id="savingsBottomGroupDiv">
                     <div class="savingsBottomDiv">
-                        <h3>Exchange rates:</h3>
+
                         <div id="rateContainer"></div>
                     </div>
                     <div class="savingsBottomDiv">
-                        <p>Exchange money in X months. </p>
-
+                        <br><br>
+                        <div id="summaryContainer"></div>
                     </div>
                 </div>
             </div>
@@ -92,8 +92,70 @@
         var pointBackgroundColors = ["#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF",
                                         "#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF"];
 
+        let switched = 0;
 
+        function switchCurrency() {
+            console.log(switched)
 
+            if (switched == 0){
+                document.getElementById("flag1").src = "{{ url_for('static', filename='europeFlagCircular.png')}}";
+                document.getElementById("flag2").src = "{{ url_for('static', filename='britishFlagCircular.png')}}";
+                switched=1;
+            }
+            else {
+                document.getElementById("flag1").src = "{{ url_for('static', filename='britishFlagCircular.png')}}";
+                document.getElementById("flag2").src = "{{ url_for('static', filename='europeFlagCircular.png')}}";
+                switched=0;
+            }
+        }
+
+        function calculateExchange() {
+            var exchangeRates = [
+                {% for item in history %}
+                          {{ item }},
+                        {% endfor %}]
+
+            exchangeRates = exchangeRates.slice(Math.max(exchangeRates.length - 7, 0))
+
+            var months = [
+                {% for item in labels %}
+                  "{{ item }}",
+                {% endfor %}]
+
+            var moneyInput = document.getElementById("moneyInput").value;
+            var monthCount = 5
+            var str = '<h3>Exchange rates:</h3> ' +
+                '<ul>'
+
+            exchangeRates.forEach(function(rate) {
+                var exchangedMoney = (parseFloat(rate) * parseFloat(moneyInput)).toFixed(2);
+
+                var month = months[monthCount];
+
+                if (monthCount == 5) {
+                    month = 'Now'
+                };
+
+                str += '<li>' + month + ' -> €' + exchangedMoney.toString() + '</li>';
+                monthCount++;
+            });
+
+            str += '</ul>'
+            document.getElementById("rateContainer").innerHTML = str;
+
+            var bestRateIndex = exchangeRates.indexOf(Math.max(...exchangeRates));
+
+            var bestMonth;
+            if (bestRateIndex == 0) {
+                bestMonth = 'now.'
+            } else {
+                bestMonth = 'in ' + bestRateIndex.toString() + ' months.'
+            }
+            var str2 = 'Exchange your money <b>' + bestMonth + '</b>';
+            document.getElementById("summaryContainer").innerHTML = str2;
+            document.getElementById("summaryContainer").style.border = "2px solid #000000";
+
+        }
 
         var barData = {
           labels : [
@@ -167,40 +229,7 @@
           }
         }
 
-        var exchangeRates = [
-            {% for item in history %}
-                      {{ item }},
-                    {% endfor %}]
 
-        exchangeRates = exchangeRates.slice(Math.max(exchangeRates.length - 7, 0))
-
-        var months = [
-            {% for item in labels %}
-              "{{ item }}",
-            {% endfor %}
-        ]
-
-        var str = '<ul>'
-
-        var moneyInput = document.getElementById("moneyInput").value;
-
-        var monthCount = 5
-
-        exchangeRates.forEach(function(rate) {
-            var exchangedMoney = (parseFloat(rate) * parseFloat(moneyInput)).toFixed(2);
-
-            var month = months[monthCount];
-
-            if (monthCount == 5) {
-                month = 'Now'
-            };
-
-            str += '<li>' + month + ' -> €' + exchangedMoney.toString() + '</li>';
-            monthCount++;
-        });
-
-        str += '</ul>'
-        document.getElementById("rateContainer").innerHTML = str;
 
     </script>
 </body>
