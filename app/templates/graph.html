@@ -45,21 +45,44 @@
     </div>
 
     <div id="myModal" class="modal">
-
-      <!-- Modal content -->
-      <div class="modal-content">
-        <div class="modal-header">
-          <span class="close">&times;</span>
-          <h2>Modal Header</h2>
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2 id="ModalHeader">Potential savings calculator</h2>
+            </div>
+            <div class="modal-body">
+                <div id="savingsGroupDiv">
+                    <div class="inputDiv">
+                        <p>Amount:</p>
+                        <input class="savingsColumn" height="40" type="text" id="moneyInput" name="fname">
+                    </div>
+                    <div class="inputDiv">
+                        <p>From:</p>
+                        <img src="{{ url_for('static', filename='britishFlagCircular.png')}}" alt="Girl in a jacket" style="width:40px;height:40px;">
+                    </div >
+                    <div class="inputDiv">
+                        <br><br><br>
+                        <input type="image" src="{{ url_for('static', filename='switch.png')}}" id="saveForm" style="width:20px;height:35px;" />
+                    </div>
+                    <div class="inputDiv">
+                        <p>To:</p>
+                        <img src="{{ url_for('static', filename='europeFlagCircular.png')}}" alt="Girl in a jacket" style="width:40px;height:40px;">
+                    </div>
+                    <div class="inputDiv">
+                        <br><br><br>
+                        <Button class="savingsColumn" style="width:40px;height:40px;"> <b> > </b> </Button>
+                    </div>
+                </div>
+                <div id="savingsBottomGroupDiv">
+                    <div class="savingsBottomDiv">
+                        <p>Exchange rates:</p>
+                    </div>
+                    <div class="savingsBottomDiv">
+                        <p>Exchange money in X months. </p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="modal-body">
-          <p>Some text in the Modal Body</p>
-          <p>Some other text...</p>
-        </div>
-        <div class="modal-footer">
-          <h3>Modal Footer</h3>
-        </div>
-      </div>
     </div>
 
 
