@@ -153,7 +153,7 @@ def line():
 
     title = 'Forex Forecast.'
 
-    return render_template('graph.html', title=title, max=30, labels=months, history=history, recentDate=recentDate)
+    return render_template('graph.html', title=title, max=30, labels=months, history=history, predictions=predictions, recentDate=recentDate)
 
 
 @app.route('/')

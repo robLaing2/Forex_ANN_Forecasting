@@ -54,7 +54,7 @@
                 <div id="savingsGroupDiv">
                     <div class="inputDiv">
                         <p>Amount:</p>
-                        <input class="savingsColumn" height="40" type="text" id="moneyInput" name="fname">
+                        <input class="savingsColumn" height="40" type="text" id="moneyInput" name="fname" value="100">
                     </div>
                     <div class="inputDiv">
                         <p>From:</p>
@@ -75,10 +75,12 @@
                 </div>
                 <div id="savingsBottomGroupDiv">
                     <div class="savingsBottomDiv">
-                        <p>Exchange rates:</p>
+                        <h3>Exchange rates:</h3>
+                        <div id="rateContainer"></div>
                     </div>
                     <div class="savingsBottomDiv">
                         <p>Exchange money in X months. </p>
+
                     </div>
                 </div>
             </div>
@@ -89,6 +91,9 @@
     <script>
         var pointBackgroundColors = ["#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF",
                                         "#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF"];
+
+
+
 
         var barData = {
           labels : [
@@ -111,8 +116,6 @@
                       {{ item }},
                     {% endfor %}]
                   }]
-
-
       }
 
       // get bar chart canvas
@@ -163,6 +166,41 @@
             modal.style.display = "none";
           }
         }
+
+        var exchangeRates = [
+            {% for item in history %}
+                      {{ item }},
+                    {% endfor %}]
+
+        exchangeRates = exchangeRates.slice(Math.max(exchangeRates.length - 7, 0))
+
+        var months = [
+            {% for item in labels %}
+              "{{ item }}",
+            {% endfor %}
+        ]
+
+        var str = '<ul>'
+
+        var moneyInput = document.getElementById("moneyInput").value;
+
+        var monthCount = 5
+
+        exchangeRates.forEach(function(rate) {
+            var exchangedMoney = (parseFloat(rate) * parseFloat(moneyInput)).toFixed(2);
+
+            var month = months[monthCount];
+
+            if (monthCount == 5) {
+                month = 'Now'
+            };
+
+            str += '<li>' + month + ' -> €' + exchangedMoney.toString() + '</li>';
+            monthCount++;
+        });
+
+        str += '</ul>'
+        document.getElementById("rateContainer").innerHTML = str;
 
     </script>
 </body>
