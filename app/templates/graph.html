@@ -17,10 +17,10 @@
     <div id="groupDiv">
        <div id="graphBox">
         <canvas id="mychart" width="600" height="400"></canvas>
-           <button class="graphButtons">
+           <button class="graphButtons" onclick="updateGraph('GBP')">
                GBP/EUR
            </button>
-           <button class="graphButtons">
+           <button class="graphButtons" onclick="updateGraph('EUR')">
                EUR/GBP
            </button>
         </div>
@@ -92,42 +92,53 @@
         var pointBackgroundColors = ["#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF",
                                         "#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF"];
 
-        let switched = 0;
+        let switched = true;
 
         function switchCurrency() {
             console.log(switched)
 
-            if (switched == 0){
+            if (switched){
                 document.getElementById("flag1").src = "{{ url_for('static', filename='europeFlagCircular.png')}}";
                 document.getElementById("flag2").src = "{{ url_for('static', filename='britishFlagCircular.png')}}";
-                switched=1;
+                switched=false;
             }
             else {
                 document.getElementById("flag1").src = "{{ url_for('static', filename='britishFlagCircular.png')}}";
                 document.getElementById("flag2").src = "{{ url_for('static', filename='europeFlagCircular.png')}}";
-                switched=0;
+                switched=true;
             }
         }
 
-        function calculateExchange() {
-            var exchangeRates = [
+        var exchangeRates = [
                 {% for item in history %}
                           {{ item }},
                         {% endfor %}]
 
-            exchangeRates = exchangeRates.slice(Math.max(exchangeRates.length - 7, 0))
-
-            var months = [
+        var months = [
                 {% for item in labels %}
                   "{{ item }}",
                 {% endfor %}]
+
+
+        function calculateExchange() {
+
+            var slicedRates = exchangeRates.slice(Math.max(exchangeRates.length - 7, 0))
+            var symbol = '€'
+
+            if (!switched) {
+                for (let i = 0; i < slicedRates.length; i++) {
+                    slicedRates[i] = 1 / slicedRates[i];
+                }
+                symbol = '£'
+            }
 
             var moneyInput = document.getElementById("moneyInput").value;
             var monthCount = 5
             var str = '<h3>Exchange rates:</h3> ' +
                 '<ul>'
 
-            exchangeRates.forEach(function(rate) {
+
+            slicedRates.forEach(function(rate) {
                 var exchangedMoney = (parseFloat(rate) * parseFloat(moneyInput)).toFixed(2);
 
                 var month = months[monthCount];
@@ -136,14 +147,14 @@
                     month = 'Now'
                 };
 
-                str += '<li>' + month + ' -> €' + exchangedMoney.toString() + '</li>';
+                str += '<li>' + month + ' -> '+ symbol + exchangedMoney.toString() + '</li>';
                 monthCount++;
             });
 
             str += '</ul>'
             document.getElementById("rateContainer").innerHTML = str;
 
-            var bestRateIndex = exchangeRates.indexOf(Math.max(...exchangeRates));
+            var bestRateIndex = slicedRates.indexOf(Math.max(...slicedRates));
 
             var bestMonth;
             if (bestRateIndex == 0) {
@@ -158,27 +169,13 @@
         }
 
         var barData = {
-          labels : [
-            {% for item in labels %}
-              "{{ item }}",
-            {% endfor %}
-        ],
+            labels : months,
+            datasets : [{
+                data: exchangeRates
+            }]
 
-        datasets : [{
-              //fillColor: ["#00FF00","#FF00FF"],
-              //strokeColor: "rgba(151,187,205,1)",
-              pointColor: pointBackgroundColors,
-              pointStrokeColor: pointBackgroundColors,
-              pointHighlightFill: pointBackgroundColors,
-              //pointHighlightStroke: "rgba(151,187,205,1)",
-              //bezierCurve : false,
-              backgroundColor:pointBackgroundColors,
-              data : [
-                {% for item in history %}
-                      {{ item }},
-                    {% endfor %}]
-                  }]
-      }
+            }
+
 
       // get bar chart canvas
       var mychart = document.getElementById("mychart").getContext("2d");
@@ -187,10 +184,10 @@
       max = {{ max }}
       // draw bar chart
       var LineChartDemo = new Chart(mychart).Line(barData, {
-        scaleOverride: true,
-        scaleSteps: steps,
-        scaleStepWidth: 0.1,
-        scaleStartValue: 1,
+        //scaleOverride: true,
+        //scaleSteps: steps,
+        //scaleStepWidth: 0.2,
+        //scaleStartValue: 0,
         scaleShowVerticalLines: true,
         scaleShowGridLines : true,
         barShowStroke : true,
@@ -228,6 +225,33 @@
             modal.style.display = "none";
           }
         }
+
+        var currency = "GBP"
+
+        function updateGraph(button) {
+            console.log("Pressed")
+
+            if (currency != button ) {
+                console.log(exchangeRates)
+                for (let i = 0; i < exchangeRates.length; i++) {
+                    exchangeRates[i] = 1 / exchangeRates[i];
+                }
+
+                if (currency == "GBP") {
+                    currency = "EUR";
+                }
+                else {
+                    currency = "GBP"
+                }
+
+                for (let j=0; j < 12; j ++) {
+                    LineChartDemo.datasets[0].points[j].value = exchangeRates[j]
+                }
+
+                LineChartDemo.update();
+            }
+        }
+
 
 
 
