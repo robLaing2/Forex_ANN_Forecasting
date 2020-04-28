@@ -7,6 +7,7 @@ import os
 import quandl
 import pandas as pd
 from collections import OrderedDict
+from dbnomics import fetch_series
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -44,8 +45,10 @@ input = np.array([1.6386027, 1.60650694, 1.68153863, 1.82628306, 2.02199241, 2.0
                       1.22168131,
                       0.94374045])
 
+dataInput = []
+
 START_DATE = '2001-01-01'
-END_DATE = '2020-02-01'
+#END_DATE = '2020-02-01'
 
 
 def getMovingAverages(data, windowSize):
@@ -89,43 +92,132 @@ def getIndices(currentIndex, steps):
             index = index - 22
             indices.append(index)
 
+    indices = list(reversed(indices))
+
     return indices
 
 
-def predict():
-    new_model = keras.models.load_model('MultiStepModel.h5')
+def getCPI():
+    ukCPI = fetch_series('IMF/CPI/M.GB.PCPIHA_PC_CP_A_PT')
+    euCPI = fetch_series('IMF/CPI/M.U2.PCPIHA_PC_CP_A_PT')
 
+    dbnomicsQuery = "period >= '" + START_DATE + "'"
+
+    ukCPI = ukCPI.query(dbnomicsQuery)
+    euCPI = euCPI.query(dbnomicsQuery)
+
+    ukCPIDict = {ukCPI.period.iloc[i]: ukCPI.value.iloc[i] for i in range(len(ukCPI))}
+    euCPIDict = {euCPI.period.iloc[i]: euCPI.value.iloc[i] for i in range(len(euCPI))}
+
+    dates = []
+    ukCPIarr = []
+    euCPIarr = []
+
+    for k, v in ukCPIDict.items():
+        match = euCPIDict.get(k, 0)
+
+        ukCPIarr.append(v)
+        euCPIarr.append(match)
+        dates.append(k)
+
+    ukCPIarr = np.array(ukCPIarr, dtype=np.float)
+    euCPIarr = np.array(euCPIarr, dtype=np.float)
+
+    ukEuCPIRatio = ukCPIarr / euCPIarr
+
+    cpi_mean = 0.3957793542714463
+    cpi_std = 0.9813408912397396
+    ukEuCPIRatio = (ukEuCPIRatio - cpi_mean) / cpi_std
+
+    cpiDict = {dates[i]: ukEuCPIRatio[i] for i in range(len(dates))}
+
+    return cpiDict
+
+def getForex():
     quandl.ApiConfig.api_key = "VXqfuyrbTE8xxYZzqePw"
-    dataGbpEurRate = quandl.get("BOE/XUDLERS", start_date=START_DATE, end_date=END_DATE, returns="numpy")
+    dataGbpEurRate = quandl.get("BOE/XUDLERS", start_date=START_DATE, returns="numpy")
     forexDataN = dataGbpEurRate.Value
 
-    forex_mean = forexDataN.mean()
-    forex_std = forexDataN.std()
+    print(forexDataN)
+    print("--")
+
+    forex_mean = 1.308
+    forex_std = 0.1634
     forexDataN = (forexDataN - forex_mean) / forex_std
 
     dates = []
     for x in dataGbpEurRate.Date:
         dates.append(pd.Timestamp(x))
 
+    print(dataGbpEurRate.Date)
+
     averaged = getMovingAverages(forexDataN, 30)
 
     currentIndex = len(averaged) - 1
 
-    indices = getIndices(currentIndex, 20)
+    indices = getIndices(currentIndex, 24)
 
     dates = np.asarray(dates)
     mov = np.asarray(averaged)
 
     mov = mov[indices]
+    dates = dates[indices]
+
+    dataInput.append(mov)
+
+    return dates, mov
+
+
+def predict():
+    new_model = keras.models.load_model('finalModel.h5')
+
+    cpiDict = getCPI()
+    recentCpi = 0
+
+    dates, forex = getForex()
+
+    print(dates)
+
+    dataDf = pd.DataFrame(columns=['Date','forex','cpi'])
+
+    for x in range(len(forex)):
+
+        date = dates[x]
+        dateRounded = date.replace(day=1)
+        cpi = cpiDict.get(dateRounded, recentCpi)
+        recentCpi = cpi
+
+        dataDf = dataDf.append({
+            'Date':date,
+            'forex':forex[x],
+            'cpi':cpi},
+            ignore_index=True)
+
+    features = ['forex','cpi']
+    dataSet = dataDf[features]
+    dataSet = dataSet.values
+
+    print(dataSet)
+
+
+    #print(len(forex))
+    #print(len(dates))
 
     recent = dates[-1]
 
-    b = np.tile(mov, (30, 1))
-    b = np.array([b])
-    b = b.reshape(30, 20, 1)
-    b = tf.constant(b)
+    #b = np.tile(forex, (30, 1))
+    #b = np.array([b])
+    #b = b.reshape(30, 20, 1)
+    #b = tf.constant(b)
 
-    y = new_model.predict(b)[0]
+    #dataTf = np.tile(dataSet, (30, 1))
+
+    #print(dataSet)
+    #print(dataTf)
+    dataTf = tf.constant([dataSet])
+
+    y = new_model.predict(dataTf)[0]
+    print(y)
     return y, recent
 
 
@@ -144,12 +236,16 @@ def line():
 
     months = (labels[-x:] + labels[:-x])
 
-    history = input[:6]
+    history = dataInput[0][-6:]
+
+    print("000000")
+    print(history)
 
     history = (history * 0.1634) + 1.308
     predictions = (predictions * 0.1634) + 1.308
 
     history = np.concatenate((history, predictions))
+    history = ['%.3f' % elem for elem in history]
 
     title = 'Forex Forecast.'
 
