@@ -221,7 +221,7 @@ def predict():
     return y, recent
 
 
-@app.route('/line')
+@app.route('/')
 def line():
     predictions, recent = predict()
 
@@ -252,7 +252,7 @@ def line():
     return render_template('graph.html', title=title, max=30, labels=months, history=history, predictions=predictions, recentDate=recentDate)
 
 
-@app.route('/')
+@app.route('/line')
 def hello_world():
     return render_template('home.html')
 

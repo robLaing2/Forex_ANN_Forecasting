@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
     <title>{{ title }}</title>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='mystyle.css')}}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
@@ -16,7 +16,11 @@
 
     <div id="groupDiv">
        <div id="graphBox">
-        <canvas id="mychart" width="600" height="400"></canvas>
+           <h3 id="graphTitle">Exchange rates for GBP/EUR:</h3>
+           <div class="gta" >
+               <canvas id="mychart"></canvas>
+           </div>
+
            <button class="graphButtons" onclick="updateGraph('GBP')">
                GBP/EUR
            </button>
@@ -25,16 +29,12 @@
            </button>
         </div>
         <div id="statsBox">
-            <h2>Confidence:</h2>
-            <ul>
-                <li>Month 1:</li>
-                <li>Month 2:</li>
-                <li>Month 3:</li>
-                <li>Month 4:</li>
-                <li>Month 5:</li>
-                <li>Month 6:</li>
-            </ul>
-            <p id="recentDateText">Most recent data collected: {{ recentDate }}</p>
+            <h2>Forecasted Rates:</h2>
+            <div id="forecastedRates"></div>
+            <br>
+            <p id="recentDateText">Most recent data collected: <b>{{ recentDate }}</b></p>
+            <p>Confidence actual highest month = predicted highest: <b>31.4%</b></p>
+            <p>Confidence actual highest month <= predicted 2nd highest : <b>45.5%</b></p>
         </div>
     </div>
 
@@ -52,30 +52,34 @@
             </div>
             <div class="modal-body">
                 <div id="savingsGroupDiv">
-                    <div class="inputDiv">
+                    <div class="inputDiv" id="amountInput">
                         <p>Amount:</p>
                         <input class="savingsColumn" height="40" type="text" id="moneyInput" name="fname" value="100">
                     </div>
-                    <div class="inputDiv">
+                    <div class="inputDiv" id="firstFlag">
                         <p>From:</p>
                         <img src="{{ url_for('static', filename='britishFlagCircular.png')}}" id="flag1" style="width:40px;height:40px;">
                     </div >
-                    <div class="inputDiv">
+                    <div class="inputDiv" id="swapIcon">
                         <br><br><br>
                         <input type="image" src="{{ url_for('static', filename='switch.png')}}" id="saveForm" onClick="switchCurrency()" style="width:20px;height:35px;" />
                     </div>
-                    <div class="inputDiv">
+                    <div class="inputDiv" id="secondFlag">
                         <p>To:</p>
                         <img src="{{ url_for('static', filename='europeFlagCircular.png')}}" id="flag2" style="width:40px;height:40px;">
                     </div>
-                    <div class="inputDiv">
-                        <br><br><br>
+                    <div class="inputDiv" id="monthInput">
+                        <p>By:</p>
+                        <select id="monthSelect">
+                        </select>
+                    </div>
+                    <div class="inputDiv" id="buttonInput">
+                        <br><div id="breaks"><br><br></div>
                         <Button class="savingsColumn" onClick="calculateExchange()" style="width:40px;height:40px;"> <b> > </b> </Button>
                     </div>
                 </div>
                 <div id="savingsBottomGroupDiv">
                     <div class="savingsBottomDiv">
-
                         <div id="rateContainer"></div>
                     </div>
                     <div class="savingsBottomDiv">
@@ -89,8 +93,6 @@
 
 
     <script>
-        var pointBackgroundColors = ["#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF",
-                                        "#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF"];
 
         let switched = true;
 
@@ -100,11 +102,14 @@
             if (switched){
                 document.getElementById("flag1").src = "{{ url_for('static', filename='europeFlagCircular.png')}}";
                 document.getElementById("flag2").src = "{{ url_for('static', filename='britishFlagCircular.png')}}";
+
                 switched=false;
             }
             else {
                 document.getElementById("flag1").src = "{{ url_for('static', filename='britishFlagCircular.png')}}";
                 document.getElementById("flag2").src = "{{ url_for('static', filename='europeFlagCircular.png')}}";
+                document.getElementById("graphTitle").innerText = "Exchange rates for GBP/EUR:";
+                updateForecastedRates()
                 switched=true;
             }
         }
@@ -119,10 +124,44 @@
                   "{{ item }}",
                 {% endfor %}]
 
+        var select = document.getElementById('monthSelect');
+
+        futureMonths = months.slice(Math.max(months.length - 6, 0))
+
+        futureMonths.forEach(addOption)
+
+        function updateForecastedRates() {
+
+
+            var forecastedRates = '<ul>' +
+                '<li> Now: ' + exchangeRates[5] + '</li>'
+
+            for (i = 6; i<exchangeRates.length;i++){
+                forecastedRates += '<li>' + months[i] + ': ' + exchangeRates[i] + '</li>'
+            }
+            forecastedRates += '</ul>'
+
+            document.getElementById("forecastedRates").innerHTML = forecastedRates;
+        }
+
+        updateForecastedRates()
+
+
+        function addOption(item,index) {
+            var opt = document.createElement('option');
+            opt.value = item;
+            opt.innerHTML = item;
+            select.appendChild(opt);
+        }
+
 
         function calculateExchange() {
 
-            var slicedRates = exchangeRates.slice(Math.max(exchangeRates.length - 7, 0))
+            var x = document.getElementById("monthSelect").selectedIndex;
+
+            var monthStartIndex = exchangeRates.length - 7;
+
+            var slicedRates = exchangeRates.slice(monthStartIndex,(monthStartIndex+x+2))
             var symbol = '€'
 
             if (!switched) {
@@ -163,6 +202,7 @@
                 bestMonth = 'in ' + bestRateIndex.toString() + ' months.'
             }
             var str2 = 'Exchange your money <b>' + bestMonth + '</b>';
+
             document.getElementById("summaryContainer").innerHTML = str2;
             document.getElementById("summaryContainer").style.border = "2px solid #000000";
 
@@ -185,19 +225,17 @@
       // draw bar chart
       var LineChartDemo = new Chart(mychart).Line(barData, {
         //scaleOverride: true,
-        //scaleSteps: steps,
+        scaleSteps: steps,
         //scaleStepWidth: 0.2,
         //scaleStartValue: 0,
         scaleShowVerticalLines: true,
         scaleShowGridLines : true,
         barShowStroke : true,
         scaleShowLabels: true,
-        bezierCurve: false,
+        bezierCurve: true,
+          responsive:true,
+          maintainAspectRatio:false
       });
-
-        LineChartDemo.datasets[0].points[6].fillColor ="#ffa500";
-        LineChartDemo.update();
-
 
 
         // Get the modal
@@ -234,24 +272,42 @@
             if (currency != button ) {
                 console.log(exchangeRates)
                 for (let i = 0; i < exchangeRates.length; i++) {
-                    exchangeRates[i] = 1 / exchangeRates[i];
+                    exchangeRates[i] = (1 / exchangeRates[i]).toFixed(3);;
                 }
 
                 if (currency == "GBP") {
                     currency = "EUR";
+                    document.getElementById("graphTitle").innerHTML = "Exchange rates for EUR/GBP:";
+                    updateForecastedRates()
                 }
                 else {
                     currency = "GBP"
+                    document.getElementById("graphTitle").innerHTML = "Exchange rates for GBP/EUR:";
+                    updateForecastedRates()
                 }
 
                 for (let j=0; j < 12; j ++) {
                     LineChartDemo.datasets[0].points[j].value = exchangeRates[j]
                 }
 
+                console.log(LineChartDemo)
+
                 LineChartDemo.update();
             }
         }
 
+        LineChartDemo.datasets[0].points[6].strokeColor = "#ffa500";
+        LineChartDemo.datasets[0].points[6].fillColor = "#ffa500";
+        LineChartDemo.datasets[0].points[6].highlightFill = "#ffa500";
+
+        LineChartDemo.datasets[0].fill = "#cccccc";
+
+        LineChartDemo.scale.lineColor = "#303030";
+        LineChartDemo.options.datasetStrokeWidth = 3;
+        LineChartDemo.options.multiTooltipKeyBackground = "#cccccc";
+
+
+        LineChartDemo.update();
 
 
 

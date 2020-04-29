@@ -33,7 +33,7 @@ h1 {
 }
 
 #moneyInput {
-  width:120px;
+  width:60px;
 }
 
 #savingsGroupDiv {
@@ -45,13 +45,18 @@ h1 {
 #savingsBottomGroupDiv {
   font-family: "Courier New";
   text-align: center;
-  margin: 20px auto auto;
+  margin-top: 20px;
+  margin-right: auto;
+  margin-left: auto;
+  margin-bottom: auto;
+  overflow:auto;
 }
 
 .savingsBottomDiv {
   display: inline-block;
   vertical-align: top;
   width: 250px;
+  overflow: auto;
 }
 
 #rateContainer {
@@ -71,8 +76,8 @@ h1 {
   border-radius: 25px;
   border: 2px solid #ffa500;
   padding: 10px;
-  width: 600px;
-  height: 450px;
+  width: 40vw;
+  height: 50vh;
   background-color: #DCDCDC;
 }
 
@@ -83,9 +88,10 @@ h1 {
   border-radius: 25px;
   border: 2px solid #ffa500;
   padding: 10px;
-  width: 300px;
-  height: 450px;
+  width: 18vw;
+  height: 50vh;
   background-color: #DCDCDC;
+  overflow:auto;
 }
 
 #savingsDiv {
@@ -132,11 +138,11 @@ ul li{
   padding: 10px 20px;
   text-align: center;
   text-decoration: none;
-  margin: auto 25px auto 25px;
   cursor: pointer;
   border-radius: 16px;
   background-color: #616161;
   font-weight: bold;
+  margin: 5px 25px auto;
 }
 
 .savings{
@@ -153,9 +159,11 @@ ul li{
   top: 0;
   width: 100%; /* Full width */
   height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
+  overflow-y: auto; /* Enable scroll if needed */
   background-color: rgb(0,0,0); /* Fallback color */
   background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
+  max-height: 100vh;
+  overflow: auto;
 }
 
 /* Modal Content */
@@ -165,13 +173,15 @@ ul li{
   margin: auto;
   padding: 0;
   border: 1px solid #888;
-  width: 30%;
+  width: 700px;
   height: 500px;
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.3),0 6px 20px 0 rgba(0,0,0,0.29);
   -webkit-animation-name: animatetop;
   -webkit-animation-duration: 0.4s;
   animation-name: animatetop;
-  animation-duration: 0.4s
+  animation-duration: 0.4s;
+  max-height:100%;
+  overflow:auto;
 }
 
 /* Add Animation */
@@ -179,6 +189,7 @@ ul li{
   from {top:-300px; opacity:0}
   to {top:0; opacity:1}
 }
+
 
 @keyframes animatetop {
   from {top:-300px; opacity:0}
@@ -200,6 +211,11 @@ ul li{
   cursor: pointer;
 }
 
+h3 {
+  padding: 3px;
+  margin: 3px;
+}
+
 .modal-header {
   font-family: "Courier New";
   padding: 2px 16px;
@@ -207,10 +223,77 @@ ul li{
   color: #181818;
 }
 
-.modal-body {padding: 2px 16px;}
+.modal-body {
+  padding-top: 2px;
+  padding-right: 16px; #CHANGE THIS
+  padding-left: 16px;
+  padding-bottom: 2px;
+  overflow: auto;
+}
+
+.gta{
+  position: relative;
+  height:40vh;
+  width:40vw;
+}
+
 
 /* Add Animation */
 @keyframes animatetop {
   from {top: -300px; opacity: 0}
   to {top: 0; opacity: 1}
+}
+
+@media screen and (max-width:620px) {
+  /* For mobile phones: */
+
+  .modal-body{
+    width:100%;
+    height:100%;
+  }
+
+  .modal-content{
+    width:100%;
+    height:100%;
+  }
+
+  #statsBox{
+    width:100%;
+  }
+
+  #myBtn {
+    width:100%;
+    padding:3px;
+  }
+  #rateContainer{
+    text-align: center;
+  }
+
+  .inputDiv {
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+
+  .gta{
+    width:90vw;
+  }
+
+  #graphBox{
+    width:100%;
+  }
+
+  #statsBox{
+    margin-left: 0px;
+    margin-top:10px;
+  }
+
+  #breaks{
+    display: none;
+  }
+
+  #buttonInput{
+    width:100%;
+  }
+
+
 }
