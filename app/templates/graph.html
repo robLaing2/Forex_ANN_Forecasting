@@ -31,10 +31,9 @@
         <div id="statsBox">
             <h2>Forecasted Rates:</h2>
             <div id="forecastedRates"></div>
-            <br>
             <p id="recentDateText">Most recent data collected: <b>{{ recentDate }}</b></p>
             <p>Confidence actual highest month = predicted highest: <b>31.4%</b></p>
-            <p>Confidence actual highest month <= predicted 2nd highest : <b>45.5%</b></p>
+            <p>Confidence actual highest month = predicted highest or predicted 2nd highest: <b>45.5%</b></p>
         </div>
     </div>
 
@@ -94,30 +93,38 @@
 
     <script>
 
-        let switched = true;
+        var switched = false;
 
         function switchCurrency() {
-            console.log(switched)
 
-            if (switched){
+            if (!switched){
                 document.getElementById("flag1").src = "{{ url_for('static', filename='europeFlagCircular.png')}}";
                 document.getElementById("flag2").src = "{{ url_for('static', filename='britishFlagCircular.png')}}";
-
-                switched=false;
+                switched=true;
             }
             else {
                 document.getElementById("flag1").src = "{{ url_for('static', filename='britishFlagCircular.png')}}";
                 document.getElementById("flag2").src = "{{ url_for('static', filename='europeFlagCircular.png')}}";
                 document.getElementById("graphTitle").innerText = "Exchange rates for GBP/EUR:";
                 updateForecastedRates()
-                switched=true;
+                switched=false;
             }
         }
 
-        var exchangeRates = [
+        var exchangeRatesGBP = [
                 {% for item in history %}
                           {{ item }},
                         {% endfor %}]
+
+        var exchangeRatesEUR = [
+                {% for item in history %}
+                          {{ item }},
+                        {% endfor %}]
+
+        for (let i = 0; i < exchangeRatesEUR.length; i++) {
+                    exchangeRatesEUR[i] = (1 / exchangeRatesEUR[i]).toFixed(3);
+                }
+
 
         var months = [
                 {% for item in labels %}
@@ -130,11 +137,19 @@
 
         futureMonths.forEach(addOption)
 
-        function updateForecastedRates() {
+        function updateForecastedRates(exchange) {
+
+            var exchangeRates;
+
+            if (exchange == "GBP") {
+                exchangeRates = exchangeRatesGBP
+            } else {
+                exchangeRates = exchangeRatesEUR
+            }
 
 
             var forecastedRates = '<ul>' +
-                '<li> Now: ' + exchangeRates[5] + '</li>'
+                '<li> Current: ' + exchangeRates[5] + '</li>'
 
             for (i = 6; i<exchangeRates.length;i++){
                 forecastedRates += '<li>' + months[i] + ': ' + exchangeRates[i] + '</li>'
@@ -144,7 +159,7 @@
             document.getElementById("forecastedRates").innerHTML = forecastedRates;
         }
 
-        updateForecastedRates()
+        updateForecastedRates("GBP")
 
 
         function addOption(item,index) {
@@ -157,25 +172,35 @@
 
         function calculateExchange() {
 
-            var x = document.getElementById("monthSelect").selectedIndex;
+            var exchangeRates = exchangeRatesGBP;
+            var symbol = '€';
 
-            var monthStartIndex = exchangeRates.length - 7;
-
-            var slicedRates = exchangeRates.slice(monthStartIndex,(monthStartIndex+x+2))
-            var symbol = '€'
-
-            if (!switched) {
-                for (let i = 0; i < slicedRates.length; i++) {
-                    slicedRates[i] = 1 / slicedRates[i];
-                }
-                symbol = '£'
+            if (switched) {
+                exchangeRates = exchangeRatesEUR;
+                symbol = '£';
             }
 
+            for(i=0;i < exchangeRates.length; i++){
+                exchangeRates[i] = parseFloat(exchangeRates[i])
+            }
+
+            console.log(exchangeRates)
+
+            var monthStartIndex = exchangeRates.length - 7;
+            var x = document.getElementById("monthSelect").selectedIndex;
+            var slicedRates = exchangeRates.slice(monthStartIndex,(monthStartIndex+x+2));
+
             var moneyInput = document.getElementById("moneyInput").value;
-            var monthCount = 5
+            var monthCount = 5;
+
+            console.log(slicedRates)
+
+            var bestRateIndex = slicedRates.indexOf(Math.max(...slicedRates));
+
+            console.log(bestRateIndex)
+
             var str = '<h3>Exchange rates:</h3> ' +
                 '<ul>'
-
 
             slicedRates.forEach(function(rate) {
                 var exchangedMoney = (parseFloat(rate) * parseFloat(moneyInput)).toFixed(2);
@@ -186,14 +211,22 @@
                     month = 'Now'
                 };
 
-                str += '<li>' + month + ' -> '+ symbol + exchangedMoney.toString() + '</li>';
+                if((monthCount-5)==bestRateIndex){
+                    str += '<li> <b>' + month + ' -> '+ symbol + exchangedMoney.toString() + ' </b></li>';
+                }
+                else {
+                    str += '<li>' + month + ' -> '+ symbol + exchangedMoney.toString() + '</li>';
+                }
+
                 monthCount++;
             });
 
             str += '</ul>'
             document.getElementById("rateContainer").innerHTML = str;
 
-            var bestRateIndex = slicedRates.indexOf(Math.max(...slicedRates));
+
+
+            console.log(bestRateIndex)
 
             var bestMonth;
             if (bestRateIndex == 0) {
@@ -211,7 +244,7 @@
         var barData = {
             labels : months,
             datasets : [{
-                data: exchangeRates
+                data: exchangeRatesGBP
             }]
 
             }
@@ -267,30 +300,27 @@
         var currency = "GBP"
 
         function updateGraph(button) {
-            console.log("Pressed")
 
             if (currency != button ) {
-                console.log(exchangeRates)
-                for (let i = 0; i < exchangeRates.length; i++) {
-                    exchangeRates[i] = (1 / exchangeRates[i]).toFixed(3);;
-                }
+
+                var exchangeRates;
 
                 if (currency == "GBP") {
                     currency = "EUR";
                     document.getElementById("graphTitle").innerHTML = "Exchange rates for EUR/GBP:";
-                    updateForecastedRates()
+                    exchangeRates = exchangeRatesEUR
+                    updateForecastedRates("EUR")
                 }
                 else {
                     currency = "GBP"
                     document.getElementById("graphTitle").innerHTML = "Exchange rates for GBP/EUR:";
-                    updateForecastedRates()
+                    exchangeRates = exchangeRatesGBP
+                    updateForecastedRates("GBP")
                 }
 
                 for (let j=0; j < 12; j ++) {
                     LineChartDemo.datasets[0].points[j].value = exchangeRates[j]
                 }
-
-                console.log(LineChartDemo)
 
                 LineChartDemo.update();
             }
