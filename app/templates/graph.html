@@ -13,11 +13,10 @@
         <h1>{{ title }}</h1>
     </div>
 
-
     <div id="groupDiv">
        <div id="graphBox">
            <h3 id="graphTitle">Exchange rates for GBP/EUR:</h3>
-           <div class="gta" >
+           <div class="chartContainer" >
                <canvas id="mychart"></canvas>
            </div>
 
@@ -93,50 +92,63 @@
 
     <script>
 
-        var switched = false;
-
-        function switchCurrency() {
-
-            if (!switched){
-                document.getElementById("flag1").src = "{{ url_for('static', filename='europeFlagCircular.png')}}";
-                document.getElementById("flag2").src = "{{ url_for('static', filename='britishFlagCircular.png')}}";
-                switched=true;
-            }
-            else {
-                document.getElementById("flag1").src = "{{ url_for('static', filename='britishFlagCircular.png')}}";
-                document.getElementById("flag2").src = "{{ url_for('static', filename='europeFlagCircular.png')}}";
-                document.getElementById("graphTitle").innerText = "Exchange rates for GBP/EUR:";
-                updateForecastedRates()
-                switched=false;
-            }
-        }
-
+        // Retrieve the GBP/EUR FOREX value from Flask values passed to it
         var exchangeRatesGBP = [
-                {% for item in history %}
+                {% for item in forex %}
                           {{ item }},
                         {% endfor %}]
 
         var exchangeRatesEUR = [
-                {% for item in history %}
+                {% for item in forex %}
                           {{ item }},
                         {% endfor %}]
 
-        for (let i = 0; i < exchangeRatesEUR.length; i++) {
-                    exchangeRatesEUR[i] = (1 / exchangeRatesEUR[i]).toFixed(3);
-                }
-
-
+        // Get the labels of the months which are given in the correct order
         var months = [
                 {% for item in labels %}
                   "{{ item }}",
                 {% endfor %}]
 
+        // Convert exchangeRatesEUR so that they represent EUR/GBP
+        for (let i = 0; i < exchangeRatesEUR.length; i++) {
+                    exchangeRatesEUR[i] = (1 / exchangeRatesEUR[i]).toFixed(3);
+                }
+
+        // variable representing the current state of the flags
+        var switched = false;
+
+        // Function which is called when the savings switch button is clicked
+        function switchCurrency() {
+
+            // If switched not true then update flags to EUR/GBP
+            if (!switched){
+                document.getElementById("flag1").src = "{{ url_for('static', filename='europeFlagCircular.png')}}";
+                document.getElementById("flag2").src = "{{ url_for('static', filename='britishFlagCircular.png')}}";
+                switched=true;
+            }
+            // if switched is true, update flags to GBP/EUR
+            else {
+                document.getElementById("flag1").src = "{{ url_for('static', filename='britishFlagCircular.png')}}";
+                document.getElementById("flag2").src = "{{ url_for('static', filename='europeFlagCircular.png')}}";
+                switched=false;
+            }
+        }
+
+        // Get the option selector and add the following 6 months for the current date
         var select = document.getElementById('monthSelect');
-
         futureMonths = months.slice(Math.max(months.length - 6, 0))
-
         futureMonths.forEach(addOption)
 
+        // Function to add single month to option selector
+        function addOption(item,index) {
+            var opt = document.createElement('option');
+            opt.value = item;
+            opt.innerHTML = item;
+            select.appendChild(opt);
+        }
+
+        // Function called to update the displated forecasted rates to either GPB/EUR or EUR/GBP
+        // Called when either of the two graph buttons are clicked
         function updateForecastedRates(exchange) {
 
             var exchangeRates;
@@ -147,7 +159,7 @@
                 exchangeRates = exchangeRatesEUR
             }
 
-
+            // update the unordered list of FOREX values
             var forecastedRates = '<ul>' +
                 '<li> Current: ' + exchangeRates[5] + '</li>'
 
@@ -159,17 +171,14 @@
             document.getElementById("forecastedRates").innerHTML = forecastedRates;
         }
 
+        // Call function to initially set rates to be displayed as GBP/EUR
         updateForecastedRates("GBP")
 
 
-        function addOption(item,index) {
-            var opt = document.createElement('option');
-            opt.value = item;
-            opt.innerHTML = item;
-            select.appendChild(opt);
-        }
 
 
+        // Function called when the savings calculator submit button is clicked
+        // Calculates and displays the expected exchange returns of the future
         function calculateExchange() {
 
             var exchangeRates = exchangeRatesGBP;
@@ -180,12 +189,12 @@
                 symbol = '£';
             }
 
+            // convert exchange rates into floats
             for(i=0;i < exchangeRates.length; i++){
                 exchangeRates[i] = parseFloat(exchangeRates[i])
             }
 
-            console.log(exchangeRates)
-
+            // Get the range of month indices, ranging from current month to the selected month
             var monthStartIndex = exchangeRates.length - 7;
             var x = document.getElementById("monthSelect").selectedIndex;
             var slicedRates = exchangeRates.slice(monthStartIndex,(monthStartIndex+x+2));
@@ -193,15 +202,16 @@
             var moneyInput = document.getElementById("moneyInput").value;
             var monthCount = 5;
 
-            console.log(slicedRates)
 
+            // Get the index of the highest rate
             var bestRateIndex = slicedRates.indexOf(Math.max(...slicedRates));
 
-            console.log(bestRateIndex)
 
+            // Create and unordered list of the potential returns
             var str = '<h3>Exchange rates:</h3> ' +
                 '<ul>'
 
+            // For each rate, calculate the returns and add it to the unordered HTML list
             slicedRates.forEach(function(rate) {
                 var exchangedMoney = (parseFloat(rate) * parseFloat(moneyInput)).toFixed(2);
 
@@ -211,6 +221,7 @@
                     month = 'Now'
                 };
 
+                // If the month index is equal to that of the highest rate then make it bold
                 if((monthCount-5)==bestRateIndex){
                     str += '<li> <b>' + month + ' -> '+ symbol + exchangedMoney.toString() + ' </b></li>';
                 }
@@ -224,15 +235,18 @@
             str += '</ul>'
             document.getElementById("rateContainer").innerHTML = str;
 
-
-
-            console.log(bestRateIndex)
-
+            // Change the text depending on what month the best rate is
             var bestMonth;
             if (bestRateIndex == 0) {
                 bestMonth = 'now.'
-            } else {
-                bestMonth = 'in ' + bestRateIndex.toString() + ' months.'
+            }
+            else {
+                if (bestRateIndex == 1) {
+                    bestMonth = 'in ' + bestRateIndex.toString() + ' month.'
+                }
+                else {
+                    bestMonth = 'in ' + bestRateIndex.toString() + ' months.'
+                }
             }
             var str2 = 'Exchange your money <b>' + bestMonth + '</b>';
 
@@ -241,12 +255,12 @@
 
         }
 
-        var barData = {
+        // Prepare the graph data
+        var graphData = {
             labels : months,
             datasets : [{
                 data: exchangeRatesGBP
             }]
-
             }
 
 
@@ -256,11 +270,8 @@
       steps = 10
       max = {{ max }}
       // draw bar chart
-      var LineChartDemo = new Chart(mychart).Line(barData, {
-        //scaleOverride: true,
+      var LineChartDemo = new Chart(mychart).Line(graphData, {
         scaleSteps: steps,
-        //scaleStepWidth: 0.2,
-        //scaleStartValue: 0,
         scaleShowVerticalLines: true,
         scaleShowGridLines : true,
         barShowStroke : true,
@@ -271,13 +282,9 @@
       });
 
 
-        // Get the modal
+        // Get the modal and its components
         var modal = document.getElementById("myModal");
-
-        // Get the button that opens the modal
         var btn = document.getElementById("myBtn");
-
-        // Get the <span> element that closes the modal
         var span = document.getElementsByClassName("close")[0];
 
         // When the user clicks on the button, open the modal
@@ -299,8 +306,10 @@
 
         var currency = "GBP"
 
+        // Function called to update the graph and rates when either of the graph buttons are clicked
         function updateGraph(button) {
 
+            // If the current currency is different to the button that was clicked then switch the graphs
             if (currency != button ) {
 
                 var exchangeRates;
@@ -318,6 +327,7 @@
                     updateForecastedRates("GBP")
                 }
 
+                // Update graph
                 for (let j=0; j < 12; j ++) {
                     LineChartDemo.datasets[0].points[j].value = exchangeRates[j]
                 }
@@ -326,21 +336,16 @@
             }
         }
 
+        // Setting the colour and properties of the graph
         LineChartDemo.datasets[0].points[6].strokeColor = "#ffa500";
         LineChartDemo.datasets[0].points[6].fillColor = "#ffa500";
         LineChartDemo.datasets[0].points[6].highlightFill = "#ffa500";
-
         LineChartDemo.datasets[0].fill = "#cccccc";
-
         LineChartDemo.scale.lineColor = "#303030";
         LineChartDemo.options.datasetStrokeWidth = 3;
         LineChartDemo.options.multiTooltipKeyBackground = "#cccccc";
 
-
         LineChartDemo.update();
-
-
-
     </script>
 </body>
 </html>

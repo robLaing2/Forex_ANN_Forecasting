@@ -2,15 +2,20 @@ body {
   background-color: #181818;
 }
 
-#titleDiv {
-  text-align:center;
-  margin: auto;
-}
-
 h1 {
   font-family:"Courier New";
   color: #ffa500;
   font-size:50px;
+}
+
+h3 {
+  padding: 3px;
+  margin: 3px;
+}
+
+#titleDiv {
+  text-align:center;
+  margin: auto;
 }
 
 #groupDiv {
@@ -18,7 +23,6 @@ h1 {
   margin: auto;
   font-family:"Courier New";
 }
-
 
 .inputDiv {
   display: inline-block;
@@ -154,24 +158,23 @@ ul li{
 
 /* The Modal (background) */
 .modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
+  display: none;
+  position: fixed;
+  z-index: 1;
+  padding-top: 100px;
   left: 0;
   top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow-y: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.8);
   max-height: 100vh;
   overflow: auto;
 }
 
 /* Modal Content */
 .modal-content {
-  /*position: relative;*/
   background-color: #fefefe;
   margin: auto;
   padding: 0;
@@ -214,11 +217,6 @@ ul li{
   cursor: pointer;
 }
 
-h3 {
-  padding: 3px;
-  margin: 3px;
-}
-
 .modal-header {
   font-family: "Courier New";
   padding: 2px 16px;
@@ -234,12 +232,11 @@ h3 {
   overflow: auto;
 }
 
-.gta{
+.chartContainer{
   position: relative;
   height:40vh;
   width:40vw;
 }
-
 
 /* Add Animation */
 @keyframes animatetop {
@@ -247,8 +244,12 @@ h3 {
   to {top: 0; opacity: 1}
 }
 
+  /* For mobile phones:
+   When the width of the screen is less than 620px then update CSS to below values
+   to make it functional on a mobile device. Mainly making elements fill full width
+   so that they stack
+   */
 @media screen and (max-width:620px) {
-  /* For mobile phones: */
 
   .modal-body{
     width:100%;
@@ -281,7 +282,7 @@ h3 {
     margin-right: 2px;
   }
 
-  .gta{
+  .chartContainer{
     width:90vw;
   }
 
@@ -301,6 +302,4 @@ h3 {
   #buttonInput{
     width:100%;
   }
-
-
 }
